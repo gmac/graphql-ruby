@@ -268,9 +268,9 @@ module GraphQL
             write_execution_errors_in_response(path, [value])
             HALT
           elsif value.is_a?(Array) && !field.type.list? && value.any? && value.all? { |v| v.is_a?(GraphQL::ExecutionError) }
-            value.each do |error|
+            value.each_with_index do |error, index|
               error.ast_node ||= ast_node
-              error.path ||= path
+              error.path ||= path + (field.type.list? ? [index] : [])
             end
             write_execution_errors_in_response(path, value)
             HALT
