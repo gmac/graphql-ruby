@@ -267,10 +267,10 @@ module GraphQL
             value.ast_node ||= ast_node
             write_execution_errors_in_response(path, [value])
             HALT
-          elsif value.is_a?(Array) && value.any? && value.all? { |v| v.is_a?(GraphQL::ExecutionError) }
-            value.each_with_index do |error, index|
+          elsif value.is_a?(Array) && !field.type.list? && value.any? && value.all? { |v| v.is_a?(GraphQL::ExecutionError) }
+            value.each do |error|
               error.ast_node ||= ast_node
-              error.path ||= path + (field.type.list? ? [index] : [])
+              error.path ||= path
             end
             write_execution_errors_in_response(path, value)
             HALT
