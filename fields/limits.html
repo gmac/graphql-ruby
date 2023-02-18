@@ -6,7 +6,7 @@
     
       <title>GraphQL - Limits</title>
     
-    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,700" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css">
     <link rel="icon" href="/graphql-ruby-icon.png">
   </head>
@@ -19,7 +19,7 @@
           </a>
           <a href="/getting_started">Get Started</a>
           <a href="/guides">Guides</a>
-          <a href="/api-doc/1.11.5/">API</a>
+          <a href="/api-doc/2.0.17/">API</a>
           <a href="https://tinyletter.com/graphql-ruby">Newsletter</a>
           <a href="https://github.com/rmosolgo/graphql-ruby">Source Code</a>
           <a href="https://graphql.pro">Upgrade to Pro</a>
@@ -37,15 +37,82 @@
       </div>
     </div>
     <div class="container">
-      <p class="breadcrumb">
-  <a href="/">GraphQL</a>
-  &raquo; <a href="/guides">Guides</a>
-   &raquo; <a href="/guides#fields-guides">Fields</a>
-  &raquo; Limits
-</p>
+      <ul class="breadcrumb">
+  <li><a href="/guides">Guides</a></li>
+  <li>
+    <select class="jump-to-select" onchange="navigateToSelected(this)">
+      
+        <option  data-target="/schema/definition.html">Schema</option>
+      
+        <option  data-target="/queries/executing_queries.html">Queries</option>
+      
+        <option  data-target="/type_definitions/objects.html">Type Definitions</option>
+      
+        <option  data-target="/authorization/overview.html">Authorization</option>
+      
+        <option  selected data-target="/fields/introduction.html">Fields</option>
+      
+        <option  data-target="/mutations/mutation_root.html">Mutations</option>
+      
+        <option  data-target="/errors/overview.html">Errors</option>
+      
+        <option  data-target="/pagination/overview.html">Pagination</option>
+      
+        <option  data-target="/relay/range_add.html">Relay</option>
+      
+        <option  data-target="/dataloader/overview.html">Dataloader</option>
+      
+        <option  data-target="/subscriptions/overview.html">Subscriptions</option>
+      
+        <option  data-target="/pro/home.html">GraphQL Pro</option>
+      
+        <option  data-target="/operation_store/overview.html">GraphQL Pro - OperationStore</option>
+      
+        <option  data-target="/defer/overview.html">GraphQL Pro - Defer</option>
+      
+        <option  data-target="/limiters/overview.html">GraphQL Enterprise - Rate Limiters</option>
+      
+        <option  data-target="/object_cache/overview.html">GraphQL Enterprise - Object Cache</option>
+      
+        <option  data-target="/changesets/overview.html">GraphQL Enterprise - Changesets</option>
+      
+        <option  data-target="/javascript_client/overview.html">JavaScript Client</option>
+      
+        <option  data-target="/language_tools/visitor.html">Language Tools</option>
+      
+        <option  data-target="/testing/overview.html">Testing</option>
+      
+        <option  data-target="/development.html">Other</option>
+      
+    </select>
+  </li>
+  <li>
+    <select class="jump-to-select" onchange="navigateToSelected(this)">
+      
+        <option  data-target="/fields/introduction.html">Introduction</option>
+      
+        <option  data-target="/fields/arguments.html">Arguments</option>
+      
+        <option  data-target="/fields/resolvers.html">Resolvers</option>
+      
+        <option  data-target="/fields/validation.html">Validation</option>
+      
+        <option  selected data-target="/fields/limits.html">Limits</option>
+      
+    </select>
+  </li>
+</ul>
+
 
 
 <h1 class="guide-header">Limits</h1>
+<div class="guide-table-of-contents"><div class="table-of-contents">
+  <h3 class="contents-header">Contents</h3>
+  <ol class='contents-list'><li class='contents-entry'><a href='#list-fields'>List Fields
+</a></li><li class='contents-entry'><a href='#connections'>Connections
+</a></li></ol>
+</div>
+</div>
 <div class="guide-container">
   <h2 id="list-fields">List Fields</h2>
 
@@ -63,9 +130,9 @@
 
 <p>This way, you won’t hit your database for 1000 items!</p>
 
-<h2 id="relay-connections">Relay Connections</h2>
+<h2 id="connections">Connections</h2>
 
-<p>Relay connections accept a <a href="/relay/connections.html#maximum-page-size"><code class="language-plaintext highlighter-rouge">max_page_size</code> option</a> which limits the number of nodes.</p>
+<p>Connections accept a <a href="/pagination/using_connections#max-page-size"><code class="language-plaintext highlighter-rouge">max_page_size</code> option</a> which limits the number of nodes.</p>
 
 </div>
 <p class="guide-footer">
@@ -88,6 +155,10 @@
       header.textContent = "";
       header.appendChild(headerLink);
     }
+  }
+  function navigateToSelected(selectElement) {
+    var nextPage = selectElement.selectedOptions[0].dataset["target"]
+    document.location = nextPage
   }
 </script>
 

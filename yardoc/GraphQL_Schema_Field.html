@@ -1,29 +1,30 @@
 <!DOCTYPE HTML>
 <html lang="en">
   <head>
-    <meta http-equiv="refresh" content="1;url=/api-doc/1.11.5/GraphQL/Schema/Field" />
+    <meta http-equiv="refresh" content="1;url=/api-doc/2.0.17/GraphQL/Schema/Field" />
   </head>
   <body>
     <p>Class: GraphQL::Schema::Field &lt; Object
-Direct Known Subclasses:
-Types::Relay::BaseField
 Includes:
+GraphQL::Schema::Member::HasDeprecationReason,
+GraphQL::Schema::Member::HasDirectives,
 GraphQL::Schema::FindInheritedValue::EmptyObjects,
+GraphQL::Schema::Member::HasValidators,
 GraphQL::Schema::Member::HasPath,
 GraphQL::Schema::Member::HasAstNode,
-GraphQL::Schema::Member::HasArguments,
-GraphQL::Schema::Member::AcceptsDefinition,
-GraphQL::Schema::Member::CachedGraphQLDefinition
+GraphQL::Schema::Member::HasArguments::FieldConfigured,
+GraphQL::Schema::Member::HasArguments
 Extended by:
 GraphQL::Schema::FindInheritedValue
 Class methods:
 connection_extension, from_options
 Instance methods:
-accessible?, authorized?, broadcastable?, complexity, connection?,
-extension, extensions, extras, fetch_extra, has_max_page_size?,
-initialize, introspection?, method_conflict_warning?, owner_type,
-public_send_field, resolve, resolve_field, resolver,
-run_extensions_before_resolve, scoped?, to_graphql, to_ruby_args,
+assert_satisfactory_implementation, authorized?, broadcastable?,
+calculate_complexity, complexity, connection?, default_page_size,
+extension, extensions, extras, fetch_extra, has_default_page_size?,
+has_max_page_size?, initialize, inspect, introspection?,
+max_page_size, method_conflict_warning?, owner_type, resolve,
+resolver, resolver_method, run_extensions_before_resolve, scoped?,
 visible?, with_extensions</p>
 
 

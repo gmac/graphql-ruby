@@ -6,7 +6,7 @@
     
       <title>GraphQL - Pusher Implementation</title>
     
-    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,700" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css">
     <link rel="icon" href="/graphql-ruby-icon.png">
   </head>
@@ -19,7 +19,7 @@
           </a>
           <a href="/getting_started">Get Started</a>
           <a href="/guides">Guides</a>
-          <a href="/api-doc/1.11.5/">API</a>
+          <a href="/api-doc/2.0.17/">API</a>
           <a href="https://tinyletter.com/graphql-ruby">Newsletter</a>
           <a href="https://github.com/rmosolgo/graphql-ruby">Source Code</a>
           <a href="https://graphql.pro">Upgrade to Pro</a>
@@ -37,12 +37,81 @@
       </div>
     </div>
     <div class="container">
-      <p class="breadcrumb">
-  <a href="/">GraphQL</a>
-  &raquo; <a href="/guides">Guides</a>
-   &raquo; <a href="/guides#subscriptions-guides">Subscriptions</a>
-  &raquo; Pusher Implementation
-</p>
+      <ul class="breadcrumb">
+  <li><a href="/guides">Guides</a></li>
+  <li>
+    <select class="jump-to-select" onchange="navigateToSelected(this)">
+      
+        <option  data-target="/schema/definition.html">Schema</option>
+      
+        <option  data-target="/queries/executing_queries.html">Queries</option>
+      
+        <option  data-target="/type_definitions/objects.html">Type Definitions</option>
+      
+        <option  data-target="/authorization/overview.html">Authorization</option>
+      
+        <option  data-target="/fields/introduction.html">Fields</option>
+      
+        <option  data-target="/mutations/mutation_root.html">Mutations</option>
+      
+        <option  data-target="/errors/overview.html">Errors</option>
+      
+        <option  data-target="/pagination/overview.html">Pagination</option>
+      
+        <option  data-target="/relay/range_add.html">Relay</option>
+      
+        <option  data-target="/dataloader/overview.html">Dataloader</option>
+      
+        <option  selected data-target="/subscriptions/overview.html">Subscriptions</option>
+      
+        <option  data-target="/pro/home.html">GraphQL Pro</option>
+      
+        <option  data-target="/operation_store/overview.html">GraphQL Pro - OperationStore</option>
+      
+        <option  data-target="/defer/overview.html">GraphQL Pro - Defer</option>
+      
+        <option  data-target="/limiters/overview.html">GraphQL Enterprise - Rate Limiters</option>
+      
+        <option  data-target="/object_cache/overview.html">GraphQL Enterprise - Object Cache</option>
+      
+        <option  data-target="/changesets/overview.html">GraphQL Enterprise - Changesets</option>
+      
+        <option  data-target="/javascript_client/overview.html">JavaScript Client</option>
+      
+        <option  data-target="/language_tools/visitor.html">Language Tools</option>
+      
+        <option  data-target="/testing/overview.html">Testing</option>
+      
+        <option  data-target="/development.html">Other</option>
+      
+    </select>
+  </li>
+  <li>
+    <select class="jump-to-select" onchange="navigateToSelected(this)">
+      
+        <option  data-target="/subscriptions/overview.html">Overview</option>
+      
+        <option  data-target="/subscriptions/subscription_classes.html">Subscription Classes</option>
+      
+        <option  data-target="/subscriptions/subscription_type.html">Subscription Type</option>
+      
+        <option  data-target="/subscriptions/triggers.html">Triggers</option>
+      
+        <option  data-target="/subscriptions/broadcast.html">Broadcasts</option>
+      
+        <option  data-target="/subscriptions/implementation.html">Implementation</option>
+      
+        <option  data-target="/subscriptions/action_cable_implementation.html">Action Cable Implementation</option>
+      
+        <option  selected data-target="/subscriptions/pusher_implementation.html">Pusher Implementation</option>
+      
+        <option  data-target="/subscriptions/ably_implementation.html">Ably Implementation</option>
+      
+        <option  data-target="/subscriptions/multi_tenant.html">Multi-Tenant</option>
+      
+    </select>
+  </li>
+</ul>
 
 
   <div class="pro-header">
@@ -54,24 +123,32 @@
     </p>
   </div>
 
+
 <h1 class="guide-header">Pusher Implementation</h1>
+<div class="guide-table-of-contents"><div class="table-of-contents">
+  <h3 class="contents-header">Contents</h3>
+  <ol class='contents-list'><li class='contents-entry'><a href='#how-it-works'>How it Works
+</a></li><li class='contents-entry'><a href='#database-setup'>Database setup
+</a></li><li class='contents-entry'><a href='#schema-configuration'>Schema configuration
+</a><ol class='contents-list'><li class='contents-entry'><a href='#connection-pool'>Connection Pool
+</a></li></ol></li><li class='contents-entry'><a href='#execution-configuration'>Execution configuration
+</a><ol class='contents-list'><li class='contents-entry'><a href='#payload-compression'>Payload Compression
+</a></li><li class='contents-entry'><a href='#batched-deliveries'>Batched Deliveries
+</a></li></ol></li><li class='contents-entry'><a href='#webhook-configuration'>Webhook configuration
+</a></li><li class='contents-entry'><a href='#authorization'>Authorization
+</a></li><li class='contents-entry'><a href='#serializing-context'>Serializing Context
+</a></li><li class='contents-entry'><a href='#dashboard'>Dashboard
+</a></li><li class='contents-entry'><a href='#development-tips'>Development Tips
+</a><ol class='contents-list'><li class='contents-entry'><a href='#clear-subscription-data'>Clear subscription data
+</a></li><li class='contents-entry'><a href='#developing-with-pusher-webhooks'>Developing with Pusher webhooks
+</a></li></ol></li><li class='contents-entry'><a href='#client-configuration'>Client configuration
+</a></li></ol>
+</div>
+</div>
 <div class="guide-container">
   <p><a href="https://graphql.pro">GraphQL Pro</a> includes a subscription system based on <a href="https://redis.io">Redis</a> and <a href="https://pusher.com">Pusher</a> which works with any Ruby web framework.</p>
 
 <p>After creating an app on Pusher and <a href="https://github.com/pusher/pusher-http-ruby#global">configuring the Ruby gem</a>, you can hook it up to your GraphQL schema.</p>
-
-<ul>
-  <li><a href="#how-it-works">How it Works</a></li>
-  <li><a href="#database-setup">Database setup</a></li>
-  <li><a href="#schema-configuration">Schema configuration</a></li>
-  <li><a href="#execution-configuration">Execution configuration</a></li>
-  <li><a href="#webhook-configuration">Webhook configuration</a></li>
-  <li><a href="#authorization">Authorization</a></li>
-  <li><a href="#serializing-context">Serializing context</a></li>
-  <li><a href="#dashboard">Dashboard</a></li>
-  <li><a href="#development-tips">Development tips</a></li>
-  <li><a href="#client-configuration">Client configuration</a></li>
-</ul>
 
 <h2 id="how-it-works">How it Works</h2>
 
@@ -160,6 +237,21 @@ appendonly <span class="nb">yes</span>
 
 <p>That connection will be used for managing subscription state. All writes to Redis are prefixed with <code class="language-plaintext highlighter-rouge">graphql:sub:</code>.</p>
 
+<p>There are also two configurations for managing persistence:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">stale_ttl_s:</code> expires subscription data after the given number of seconds without any update. After <code class="language-plaintext highlighter-rouge">stale_ttl_s</code> has passed, the data will expire from Redis. Each time a subscription receives an update, its TTL is refreshed. (Generally, this isn’t required because the backend is built to clean itself up. But, if you find that Redis is collecting stale queries, you can set them to expire after some very long time as a safeguard.)</li>
+  <li><code class="language-plaintext highlighter-rouge">cleanup_delay_s:</code> (default: <code class="language-plaintext highlighter-rouge">5</code>) prevents deleting a subscription during those first seconds after it’s created. Usually, a longer delay isn’t necessary, but if you observe latency between the subscription’s initial response and the client’s subscription to the delivery channel, you can set this configuration to account for it.</li>
+</ul>
+
+<h3 id="connection-pool">Connection Pool</h3>
+
+<p>For better performance reading and writing to Redis, you can pass a <code class="language-plaintext highlighter-rouge">connection_pool:</code> instead of <code class="language-plaintext highlighter-rouge">redis:</code>, using the <a href="https://github.com/mperham/connection_pool"><code class="language-plaintext highlighter-rouge">connection_pool</code> gem</a>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">use</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Pro</span><span class="o">::</span><span class="no">PusherSubscriptions</span><span class="p">,</span>
+    <span class="ss">connection_pool: </span><span class="no">ConnectionPool</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">size: </span><span class="mi">5</span><span class="p">,</span> <span class="ss">timeout: </span><span class="mi">5</span><span class="p">)</span> <span class="p">{</span> <span class="no">Redis</span><span class="p">.</span><span class="nf">new</span> <span class="p">},</span>
+</code></pre></div></div>
+
 <h2 id="execution-configuration">Execution configuration</h2>
 
 <p>During execution, GraphQL will assign a <code class="language-plaintext highlighter-rouge">subscription_id</code> to the <code class="language-plaintext highlighter-rouge">context</code> hash. The client will use that ID to listen for updates, so you must return the <code class="language-plaintext highlighter-rouge">subscription_id</code> in the response headers.</p>
@@ -187,6 +279,35 @@ appendonly <span class="nb">yes</span>
 
 <p>Read more here: <a href="https://www.html5rocks.com/en/tutorials/cors/">“Using CORS”</a>.</p>
 
+<h3 id="payload-compression">Payload Compression</h3>
+
+<p>To mitigate problems with <a href="https://support.pusher.com/hc/en-us/articles/4412243423761-What-Is-The-Message-Size-Limit-When-Publishing-an-Event-in-Channels-">Pusher’s 10kb message limit</a>, you can specify <code class="language-plaintext highlighter-rouge">compress_pusher_payload: true</code> in the <code class="language-plaintext highlighter-rouge">context</code> of your subscription. For example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/graphql_controller.rb</span>
+<span class="k">def</span> <span class="nf">execute</span>
+  <span class="c1"># ...</span>
+  <span class="c1"># Somehow detect whether the client supports compressed payloads,</span>
+  <span class="c1"># for example, User-Agent, query param, or request header:</span>
+  <span class="k">if</span> <span class="n">client_supports_compressed_payloads?</span>
+    <span class="n">context</span><span class="p">[</span><span class="ss">:compress_pusher_payload</span><span class="p">]</span> <span class="o">=</span> <span class="kp">true</span>
+  <span class="k">end</span>
+  <span class="c1"># ...</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This will cause subscription payloads to include <code class="language-plaintext highlighter-rouge">compressed_result: "..."</code> instead of <code class="language-plaintext highlighter-rouge">result: "..."</code> when they’re sent over Pusher. See docs for <a href="/javascript_client/apollo_subscriptions">Apollo Client</a> or <a href="/javascript_client/relay_subscriptions">Relay Modern</a> to read about preparing clients for compressed payloads.</p>
+
+<p>By configuring <code class="language-plaintext highlighter-rouge">compress_pusher_payload: true</code> on a query-by-query basis, the subscription backend can continue to support clients running <em>old</em> client code (by not compressing) while upgrading new clients to compressed payloads.</p>
+
+<h3 id="batched-deliveries">Batched Deliveries</h3>
+
+<p>By default, <code class="language-plaintext highlighter-rouge">PusherSubscriptions</code> sends updates in batches of up to 10 at a time, using <a href="https://github.com/pusher/pusher-http-ruby#batches">batch triggers</a>. You can customize the batch size by passing <code class="language-plaintext highlighter-rouge">batch_size:</code> when installing it, for example:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">use</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Pro</span><span class="o">::</span><span class="no">PusherSubscriptions</span><span class="p">,</span> <span class="ss">batch_size: </span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">batch_size: 1</code> will make <code class="language-plaintext highlighter-rouge">PusherSubscriptions</code> use the single trigger API instead of batch triggers.</p>
+
 <h2 id="webhook-configuration">Webhook configuration</h2>
 
 <p>Your server needs to receive webhooks from Pusher when clients disconnect. This keeps your local subscription database in sync with Pusher.</p>
@@ -212,6 +333,13 @@ appendonly <span class="nb">yes</span>
 </code></pre></div></div>
 
 <p>This way, we’ll be kept up-to-date with Pusher’s unsubscribe events.</p>
+
+<p><strong>Alternatively</strong>, you can configure the routes to load your schema lazily, during the first request:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Provide the fully-qualified class name of your schema:</span>
+<span class="n">lazy_routes</span> <span class="o">=</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Pro</span><span class="o">::</span><span class="no">Routes</span><span class="o">::</span><span class="no">Lazy</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"MySchema"</span><span class="p">)</span>
+<span class="n">mount</span> <span class="n">lazy_routes</span><span class="p">.</span><span class="nf">pusher_webhooks_client</span><span class="p">,</span> <span class="ss">at: </span><span class="s2">"/pusher_webhooks"</span>
+</code></pre></div></div>
 
 <h2 id="authorization">Authorization</h2>
 
@@ -245,7 +373,7 @@ appendonly <span class="nb">yes</span>
 
 <p>Since subscription state is stored in the database, then reloaded for pushing updates, you have to serialize and reload your query <code class="language-plaintext highlighter-rouge">context</code>.</p>
 
-<p>By default, this is done with <a href="/api-doc/1.11.5/GraphQL/Subscriptions/Serialize" target="_blank" title="API docs for GraphQL::Subscriptions::Serialize"><code>GraphQL::Subscriptions::Serialize</code></a>’s <code class="language-plaintext highlighter-rouge">dump</code> and <code class="language-plaintext highlighter-rouge">load</code> methods, but you can provide custom implementations as well. To customize the serialization logic, create a subclass of <code class="language-plaintext highlighter-rouge">GraphQL::Pro::PusherSubscriptions</code> and override <code class="language-plaintext highlighter-rouge">#dump_context(ctx)</code> and <code class="language-plaintext highlighter-rouge">#load_context(ctx_string)</code>:</p>
+<p>By default, this is done with <a href="/api-doc/2.0.17/GraphQL/Subscriptions/Serialize" target="_blank" title="API docs for GraphQL::Subscriptions::Serialize"><code>GraphQL::Subscriptions::Serialize</code></a>’s <code class="language-plaintext highlighter-rouge">dump</code> and <code class="language-plaintext highlighter-rouge">load</code> methods, but you can provide custom implementations as well. To customize the serialization logic, create a subclass of <code class="language-plaintext highlighter-rouge">GraphQL::Pro::PusherSubscriptions</code> and override <code class="language-plaintext highlighter-rouge">#dump_context(ctx)</code> and <code class="language-plaintext highlighter-rouge">#load_context(ctx_string)</code>:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CustomSubscriptions</span> <span class="o">&lt;</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Pro</span><span class="o">::</span><span class="no">PusherSubscriptions</span>
   <span class="k">def</span> <span class="nf">dump_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
@@ -322,6 +450,10 @@ appendonly <span class="nb">yes</span>
       header.textContent = "";
       header.appendChild(headerLink);
     }
+  }
+  function navigateToSelected(selectElement) {
+    var nextPage = selectElement.selectedOptions[0].dataset["target"]
+    document.location = nextPage
   }
 </script>
 

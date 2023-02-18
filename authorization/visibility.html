@@ -6,7 +6,7 @@
     
       <title>GraphQL - Visibility</title>
     
-    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,700" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css">
     <link rel="icon" href="/graphql-ruby-icon.png">
   </head>
@@ -19,7 +19,7 @@
           </a>
           <a href="/getting_started">Get Started</a>
           <a href="/guides">Guides</a>
-          <a href="/api-doc/1.11.5/">API</a>
+          <a href="/api-doc/2.0.17/">API</a>
           <a href="https://tinyletter.com/graphql-ruby">Newsletter</a>
           <a href="https://github.com/rmosolgo/graphql-ruby">Source Code</a>
           <a href="https://graphql.pro">Upgrade to Pro</a>
@@ -37,15 +37,86 @@
       </div>
     </div>
     <div class="container">
-      <p class="breadcrumb">
-  <a href="/">GraphQL</a>
-  &raquo; <a href="/guides">Guides</a>
-   &raquo; <a href="/guides#authorization-guides">Authorization</a>
-  &raquo; Visibility
-</p>
+      <ul class="breadcrumb">
+  <li><a href="/guides">Guides</a></li>
+  <li>
+    <select class="jump-to-select" onchange="navigateToSelected(this)">
+      
+        <option  data-target="/schema/definition.html">Schema</option>
+      
+        <option  data-target="/queries/executing_queries.html">Queries</option>
+      
+        <option  data-target="/type_definitions/objects.html">Type Definitions</option>
+      
+        <option  selected data-target="/authorization/overview.html">Authorization</option>
+      
+        <option  data-target="/fields/introduction.html">Fields</option>
+      
+        <option  data-target="/mutations/mutation_root.html">Mutations</option>
+      
+        <option  data-target="/errors/overview.html">Errors</option>
+      
+        <option  data-target="/pagination/overview.html">Pagination</option>
+      
+        <option  data-target="/relay/range_add.html">Relay</option>
+      
+        <option  data-target="/dataloader/overview.html">Dataloader</option>
+      
+        <option  data-target="/subscriptions/overview.html">Subscriptions</option>
+      
+        <option  data-target="/pro/home.html">GraphQL Pro</option>
+      
+        <option  data-target="/operation_store/overview.html">GraphQL Pro - OperationStore</option>
+      
+        <option  data-target="/defer/overview.html">GraphQL Pro - Defer</option>
+      
+        <option  data-target="/limiters/overview.html">GraphQL Enterprise - Rate Limiters</option>
+      
+        <option  data-target="/object_cache/overview.html">GraphQL Enterprise - Object Cache</option>
+      
+        <option  data-target="/changesets/overview.html">GraphQL Enterprise - Changesets</option>
+      
+        <option  data-target="/javascript_client/overview.html">JavaScript Client</option>
+      
+        <option  data-target="/language_tools/visitor.html">Language Tools</option>
+      
+        <option  data-target="/testing/overview.html">Testing</option>
+      
+        <option  data-target="/development.html">Other</option>
+      
+    </select>
+  </li>
+  <li>
+    <select class="jump-to-select" onchange="navigateToSelected(this)">
+      
+        <option  data-target="/authorization/overview.html">Overview</option>
+      
+        <option  selected data-target="/authorization/visibility.html">Visibility</option>
+      
+        <option  data-target="/authorization/authorization.html">Authorization</option>
+      
+        <option  data-target="/authorization/can_can_integration.html">CanCan Integration</option>
+      
+        <option  data-target="/authorization/pundit_integration.html">Pundit Integration</option>
+      
+        <option  data-target="/authorization/scoping.html">Scoping</option>
+      
+    </select>
+  </li>
+</ul>
+
 
 
 <h1 class="guide-header">Visibility</h1>
+<div class="guide-table-of-contents"><div class="table-of-contents">
+  <h3 class="contents-header">Contents</h3>
+  <ol class='contents-list'><li class='contents-entry'><a href='#hiding-parts-of-the-schema'>Hiding Parts of the Schema
+</a></li><li class='contents-entry'><a href='#object-visibility'>Object Visibility
+</a></li><li class='contents-entry'><a href='#field-visibility'>Field Visibility
+</a></li><li class='contents-entry'><a href='#argument-visibility'>Argument Visibility
+</a></li></ol>
+</div>
+</div>
 <div class="guide-container">
   <p>With GraphQL-Ruby, it’s possible to <em>hide</em> parts of your schema from some users. This isn’t exactly part of the GraphQL spec, but it’s roughly within the bounds of the spec.</p>
 
@@ -74,7 +145,7 @@
   <li>In normal queries, if a query references that member, it will return a validation error, since that member doesn’t exist</li>
 </ul>
 
-<h2 id="for-example">For Example</h2>
+<h2 id="object-visibility">Object Visibility</h2>
 
 <p>Let’s say you’re working on a new feature which should remain secret for a while. You can implement <code class="language-plaintext highlighter-rouge">.visible?</code> in a type:</p>
 
@@ -104,6 +175,41 @@
   <li>Any fields that return <code class="language-plaintext highlighter-rouge">SecretFeature</code> will be excluded from introspection</li>
 </ul>
 
+<h2 id="field-visibility">Field Visibility</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Types::BaseField</span> <span class="o">&lt;</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Schema</span><span class="o">::</span><span class="no">Field</span>
+  <span class="c1"># Pass `field ..., require_admin: true` to hide this field from non-admin users</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="ss">require_admin: </span><span class="kp">false</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="vi">@require_admin</span> <span class="o">=</span> <span class="n">require_admin</span>
+    <span class="k">super</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">visible?</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+    <span class="c1"># if `require_admin:` was given, then require the current user to be an admin</span>
+    <span class="k">super</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="vi">@require_admin</span> <span class="p">?</span> <span class="n">ctx</span><span class="p">[</span><span class="ss">:viewer</span><span class="p">]</span><span class="o">&amp;</span><span class="p">.</span><span class="nf">admin?</span> <span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>For this to work, the base field class must be <a href="/type_definitions/extensions.html#customizing-fields">configured with other GraphQL types</a>.</p>
+
+<h2 id="argument-visibility">Argument Visibility</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Types::BaseArgument</span> <span class="o">&lt;</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Schema</span><span class="o">::</span><span class="no">Argument</span>
+  <span class="c1"># If `require_logged_in: true` is given, then this argument will be hidden from logged-out viewers</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="ss">require_logged_in: </span><span class="kp">false</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="vi">@require_logged_in</span> <span class="o">=</span> <span class="n">require_logged_in</span>
+    <span class="k">super</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">visible?</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+    <span class="k">super</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="vi">@require_logged_in</span> <span class="p">?</span> <span class="n">ctx</span><span class="p">[</span><span class="ss">:viewer</span><span class="p">].</span><span class="nf">present?</span> <span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>For this to work, the base argument class must be <a href="/type_definitions/extensions.html#customizing-arguments">configured with other GraphQL types</a>.</p>
+
 </div>
 <p class="guide-footer">
   Suggestion, improvement, or correction?
@@ -125,6 +231,10 @@
       header.textContent = "";
       header.appendChild(headerLink);
     }
+  }
+  function navigateToSelected(selectElement) {
+    var nextPage = selectElement.selectedOptions[0].dataset["target"]
+    document.location = nextPage
   }
 </script>
 

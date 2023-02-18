@@ -1,18 +1,34 @@
 <!DOCTYPE HTML>
 <html lang="en">
   <head>
-    <meta http-equiv="refresh" content="1;url=/api-doc/1.11.5/GraphQL/Schema/Enum" />
+    <meta http-equiv="refresh" content="1;url=/api-doc/2.0.17/GraphQL/Schema/Enum" />
   </head>
   <body>
     <p>Class: GraphQL::Schema::Enum &lt; GraphQL::Schema::Member
+Extend this class to define GraphQL enums in your schema. 
+By default, GraphQL enum values are translated into Ruby strings.
+You can provide a custom value with the <code class="language-plaintext highlighter-rouge">value:</code> keyword. 
+Examples:
+#</p>
+<h1 id="equivalent-to">equivalent to</h1>
+<h1 id="enum-pizzatopping-">enum PizzaTopping {</h1>
+<h1 id="mushrooms">MUSHROOMS</h1>
+<h1 id="onions">ONIONS</h1>
+<h1 id="peppers">PEPPERS</h1>
+<h1>}</h1>
+<p>class PizzaTopping &lt; GraphQL::Enum
+value :MUSHROOMS
+value :ONIONS
+value :PEPPERS
+end
 Direct Known Subclasses:
 Introspection::DirectiveLocationEnum, Introspection::TypeKindEnum
 Extended by:
-GraphQL::Schema::Member::ValidatesInput,
-GraphQL::Schema::Member::AcceptsDefinition
+GraphQL::Schema::Member::ValidatesInput
 Class methods:
-coerce_input, coerce_result, enum_value_class, inherited, kind,
-own_values, to_graphql, validate_non_null_input, value, values</p>
+all_enum_value_definitions, coerce_input, coerce_result,
+enum_value_class, enum_values, inherited, kind, own_values,
+validate_non_null_input, value, values</p>
 
 
   </body>
