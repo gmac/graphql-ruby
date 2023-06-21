@@ -19,7 +19,7 @@
           </a>
           <a href="/getting_started">Get Started</a>
           <a href="/guides">Guides</a>
-          <a href="/api-doc/2.0.17/">API</a>
+          <a href="/api-doc/2.0.23/">API</a>
           <a href="https://tinyletter.com/graphql-ruby">Newsletter</a>
           <a href="https://github.com/rmosolgo/graphql-ruby">Source Code</a>
           <a href="https://graphql.pro">Upgrade to Pro</a>
@@ -134,51 +134,39 @@
 </div>
 </div>
 <div class="guide-container">
-  <p><a href="/api-doc/2.0.17/GraphQL/Tracing" target="_blank" title="API docs for GraphQL::Tracing"><code>GraphQL::Tracing</code></a> provides a <code class="language-plaintext highlighter-rouge">.trace</code> hook to observe events from the GraphQL runtime.</p>
+  <p><a href="/api-doc/2.0.23/GraphQL/Tracing/Trace" target="_blank" title="API docs for GraphQL::Tracing::Trace"><code>GraphQL::Tracing::Trace</code></a> provides hooks to observe and modify events during runtime. Tracing hooks are methods, defined in modules and mixed in with <a href="/api-doc/2.0.23/GraphQL/Schema#trace_with-class_method" target="_blank" title="API docs for GraphQL::Schema.trace_with"><code>Schema.trace_with</code></a>.</p>
 
-<p>A tracer must implement <code class="language-plaintext highlighter-rouge">.trace</code>, for example:</p>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyCustomTracer</span>
-  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">trace</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="c1"># do stuff with key &amp; data</span>
-    <span class="k">yield</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">CustomTrace</span>
+  <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">query_string</span><span class="p">:)</span>
+    <span class="c1"># measure, log, etc</span>
+    <span class="k">super</span>
   <span class="k">end</span>
+
+  <span class="c1"># ...</span>
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">.trace</code> is called with:</p>
+<p>To include a trace module when running queries, add it to the schema with <code class="language-plaintext highlighter-rouge">trace_with</code>:</p>
 
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">key</code>: the event happening in the runtime</li>
-  <li><code class="language-plaintext highlighter-rouge">data</code>: a hash of metadata about the event</li>
-  <li><code class="language-plaintext highlighter-rouge">&amp;block</code>: the event itself, it must be <code class="language-plaintext highlighter-rouge">yield</code>ed and the value must be returned</li>
-</ul>
-
-<p>To run a tracer for <strong>every query</strong>, add it to the schema with <code class="language-plaintext highlighter-rouge">tracer</code>:</p>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Run `MyCustomTracer` for all queries</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Run `MyCustomTrace` for all queries</span>
 <span class="k">class</span> <span class="nc">MySchema</span> <span class="o">&lt;</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Schema</span>
-  <span class="n">tracer</span><span class="p">(</span><span class="no">MyCustomTracer</span><span class="p">)</span>
+  <span class="n">trace_with</span><span class="p">(</span><span class="no">MyCustomTrace</span><span class="p">)</span>
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>Or, to run a tracer for <strong>one query only</strong>, add it to <code class="language-plaintext highlighter-rouge">context:</code> as <code class="language-plaintext highlighter-rouge">tracers: [...]</code>, for example:</p>
+<p>For a full list of methods and their arguments, see <a href="/api-doc/2.0.23/GraphQL/Tracing/Trace" target="_blank" title="API docs for GraphQL::Tracing::Trace"><code>GraphQL::Tracing::Trace</code></a>.</p>
 
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Run `MyCustomTracer` for this query</span>
-<span class="no">MySchema</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="ss">context: </span><span class="p">{</span> <span class="ss">tracers: </span><span class="p">[</span><span class="no">MyCustomTracer</span><span class="p">]})</span>
-</code></pre></div></div>
-
-<p>For a full list of events, see the <a href="/api-doc/2.0.17/GraphQL/Tracing" target="_blank" title="API docs for GraphQL::Tracing"><code>GraphQL::Tracing</code></a> API docs.</p>
+<p>By default, GraphQL-Ruby makes a new trace instance when it runs a query. You can pass an existing instance as <code class="language-plaintext highlighter-rouge">context: { trace: ... }</code>. Also, <code class="language-plaintext highlighter-rouge">GraphQL.parse( ..., trace: ...)</code> accepts a trace instance.</p>
 
 <h2 id="activesupportnotifications">ActiveSupport::Notifications</h2>
 
-<p>You can emit events to <code class="language-plaintext highlighter-rouge">ActiveSupport::Notifications</code> with an experimental tracer, <code class="language-plaintext highlighter-rouge">ActiveSupportNotificationsTracing</code>.</p>
+<p>You can emit events to <code class="language-plaintext highlighter-rouge">ActiveSupport::Notifications</code> with an experimental tracer, <code class="language-plaintext highlighter-rouge">ActiveSupportNotificationsTrace</code>.</p>
 
 <p>To enable it, install the tracer:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Send execution events to ActiveSupport::Notifications</span>
 <span class="k">class</span> <span class="nc">MySchema</span> <span class="o">&lt;</span> <span class="no">GraphQL</span><span class="o">::</span><span class="no">Schema</span>
-  <span class="n">tracer</span><span class="p">(</span><span class="no">GraphQL</span><span class="o">::</span><span class="no">Tracing</span><span class="o">::</span><span class="no">ActiveSupportNotificationsTracing</span><span class="p">)</span>
+  <span class="n">trace_with</span><span class="p">(</span><span class="no">GraphQL</span><span class="o">::</span><span class="no">Tracing</span><span class="o">::</span><span class="no">ActiveSupportNotificationsTrace</span><span class="p">)</span>
 <span class="k">end</span>
 </code></pre></div></div>
 
@@ -187,8 +175,6 @@
 <p>Several monitoring platforms are supported out-of-the box by GraphQL-Ruby (see platforms below).</p>
 
 <p>Leaf fields are <em>not</em> monitored (to avoid high cardinality in the metrics service).</p>
-
-<p>Implementations are based on <a href="/api-doc/2.0.17/GraphQL/Tracing/PlatformTracing" target="_blank" title="API docs for GraphQL::Tracing::PlatformTracing"><code>Tracing::PlatformTracing</code></a>.</p>
 
 <h2 id="appoptics">AppOptics</h2>
 
@@ -339,7 +325,7 @@ tracing as follows:</p>
 
 <h2 id="statsd">Statsd</h2>
 
-<p>You can add Statsd instrumentation by initializing a statsd client and passing it to <a href="/api-doc/2.0.17/GraphQL/Tracing/StatsdTracing" target="_blank" title="API docs for GraphQL::Tracing::StatsdTracing"><code>GraphQL::Tracing::StatsdTracing</code></a>:</p>
+<p>You can add Statsd instrumentation by initializing a statsd client and passing it to <a href="/api-doc/2.0.23/GraphQL/Tracing/StatsdTracing" target="_blank" title="API docs for GraphQL::Tracing::StatsdTracing"><code>GraphQL::Tracing::StatsdTracing</code></a>:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vg">$statsd</span> <span class="o">=</span> <span class="no">Statsd</span><span class="p">.</span><span class="nf">new</span> <span class="s1">'localhost'</span><span class="p">,</span> <span class="mi">9125</span>
 <span class="c1"># ...</span>
