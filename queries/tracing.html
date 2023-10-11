@@ -19,7 +19,7 @@
           </a>
           <a href="/getting_started">Get Started</a>
           <a href="/guides">Guides</a>
-          <a href="/api-doc/2.0.23/">API</a>
+          <a href="/api-doc/2.1.1/">API</a>
           <a href="https://tinyletter.com/graphql-ruby">Newsletter</a>
           <a href="https://github.com/rmosolgo/graphql-ruby">Source Code</a>
           <a href="https://graphql.pro">Upgrade to Pro</a>
@@ -120,7 +120,8 @@
 <h1 class="guide-header">Tracing</h1>
 <div class="guide-table-of-contents"><div class="table-of-contents">
   <h3 class="contents-header">Contents</h3>
-  <ol class='contents-list'><li class='contents-entry'><a href='#activesupport-notifications'>ActiveSupport::Notifications
+  <ol class='contents-list'><li class='contents-entry'><a href='#trace-modes'>Trace Modes
+</a></li><li class='contents-entry'><a href='#activesupport-notifications'>ActiveSupport::Notifications
 </a></li><li class='contents-entry'><a href='#monitoring'>Monitoring
 </a></li><li class='contents-entry'><a href='#appoptics'>AppOptics
 </a></li><li class='contents-entry'><a href='#appsignal'>Appsignal
@@ -134,7 +135,7 @@
 </div>
 </div>
 <div class="guide-container">
-  <p><a href="/api-doc/2.0.23/GraphQL/Tracing/Trace" target="_blank" title="API docs for GraphQL::Tracing::Trace"><code>GraphQL::Tracing::Trace</code></a> provides hooks to observe and modify events during runtime. Tracing hooks are methods, defined in modules and mixed in with <a href="/api-doc/2.0.23/GraphQL/Schema#trace_with-class_method" target="_blank" title="API docs for GraphQL::Schema.trace_with"><code>Schema.trace_with</code></a>.</p>
+  <p><a href="/api-doc/2.1.1/GraphQL/Tracing/Trace" target="_blank" title="API docs for GraphQL::Tracing::Trace"><code>GraphQL::Tracing::Trace</code></a> provides hooks to observe and modify events during runtime. Tracing hooks are methods, defined in modules and mixed in with <a href="/api-doc/2.1.1/GraphQL/Schema#trace_with-class_method" target="_blank" title="API docs for GraphQL::Schema.trace_with"><code>Schema.trace_with</code></a>.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">CustomTrace</span>
   <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">query_string</span><span class="p">:)</span>
@@ -154,9 +155,20 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>For a full list of methods and their arguments, see <a href="/api-doc/2.0.23/GraphQL/Tracing/Trace" target="_blank" title="API docs for GraphQL::Tracing::Trace"><code>GraphQL::Tracing::Trace</code></a>.</p>
+<p>For a full list of methods and their arguments, see <a href="/api-doc/2.1.1/GraphQL/Tracing/Trace" target="_blank" title="API docs for GraphQL::Tracing::Trace"><code>GraphQL::Tracing::Trace</code></a>.</p>
 
 <p>By default, GraphQL-Ruby makes a new trace instance when it runs a query. You can pass an existing instance as <code class="language-plaintext highlighter-rouge">context: { trace: ... }</code>. Also, <code class="language-plaintext highlighter-rouge">GraphQL.parse( ..., trace: ...)</code> accepts a trace instance.</p>
+
+<h2 id="trace-modes">Trace Modes</h2>
+
+<p>You can attach a trace module to run only in some circumstances by using <code class="language-plaintext highlighter-rouge">mode:</code>. For example, to add detailed tracing for only some requests:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">trace_with</span> <span class="no">DetailedTracing</span><span class="p">,</span> <span class="ss">mode: :detailed_metrics</span>
+</code></pre></div></div>
+
+<p>Then, to opt into that trace, use <code class="language-plaintext highlighter-rouge">context: { trace_mode: :detailed_metrics, ... }</code> when executing queries.</p>
+
+<p>Any custom trace modes <em>also</em> include the default <code class="language-plaintext highlighter-rouge">trace_with ...</code> modules (that is, those added <em>without</em> any particular <code class="language-plaintext highlighter-rouge">mode: ...</code> configuration).</p>
 
 <h2 id="activesupportnotifications">ActiveSupport::Notifications</h2>
 
@@ -325,7 +337,7 @@ tracing as follows:</p>
 
 <h2 id="statsd">Statsd</h2>
 
-<p>You can add Statsd instrumentation by initializing a statsd client and passing it to <a href="/api-doc/2.0.23/GraphQL/Tracing/StatsdTracing" target="_blank" title="API docs for GraphQL::Tracing::StatsdTracing"><code>GraphQL::Tracing::StatsdTracing</code></a>:</p>
+<p>You can add Statsd instrumentation by initializing a statsd client and passing it to <a href="/api-doc/2.1.1/GraphQL/Tracing/StatsdTracing" target="_blank" title="API docs for GraphQL::Tracing::StatsdTracing"><code>GraphQL::Tracing::StatsdTracing</code></a>:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vg">$statsd</span> <span class="o">=</span> <span class="no">Statsd</span><span class="p">.</span><span class="nf">new</span> <span class="s1">'localhost'</span><span class="p">,</span> <span class="mi">9125</span>
 <span class="c1"># ...</span>
