@@ -44,6 +44,10 @@ module GraphQL
           def own_complexity(child_complexity)
             @field_definition.calculate_complexity(query: @query, nodes: @nodes, child_complexity: child_complexity)
           end
+
+          def composite?
+            !empty?
+          end
         end
 
         def on_enter_field(node, parent, visitor)
@@ -145,35 +149,49 @@ module GraphQL
 
           # Add up the total cost for each unique field name's coalesced selections
           unique_field_keys.each_key.reduce(0) do |total, field_key|
-            composite_scopes = nil
-            field_cost = 0
+            # Collect all child scopes for this field key (always finds results)
+            child_scopes = inner_selections.filter_map { |inner_selection| inner_selection[field_key] }
 
-            # Collect composite selection scopes for further aggregation,
-            # leaf selections report their costs directly.
-            inner_selections.each do |inner_selection|
-              child_scope = inner_selection[field_key]
-              next unless child_scope
+            # Extract just composite scopes (without duplicating the array, if possible)
+            composite_scope_count = child_scopes.count(&:composite?)
+            composite_scopes = if composite_scope_count == composite_scopes.length
+              child_scopes
+            elsif composite_scope_count > 0
+              child_scopes.select(&:composite?)
+            else
+              EMPTY_ARRAY
+            end
 
-              # Empty child scopes are leaf nodes with zero child complexity.
-              if child_scope.empty?
-                field_cost = child_scope.own_complexity(0)
-                field_complexity(child_scope, max_complexity: field_cost, child_complexity: nil)
+            # Compute the merged maximum child complexity among composite scopes
+            maximum_child_complexity = if composite_scopes.any?
+              merged_max_complexity_for_scopes(query, composite_scopes)
+            else
+              0
+            end
+
+            # Identify the maximum cost and possibility among child scopes
+            maximum_cost = 0
+            maximum_scope = child_scopes.reduce(child_scopes.last) do |max_scope, possible_scope|
+              inner_cost = possible_scope.composite? ? maximum_child_complexity : 0
+              scope_cost = possible_scope.own_complexity(inner_cost)
+              if scope_cost > maximum_cost
+                maximum_cost = scope_cost
+                possible_scope
               else
-                composite_scopes ||= []
-                composite_scopes << child_scope
+                max_scope
               end
             end
 
-            if composite_scopes
-              child_complexity = merged_max_complexity_for_scopes(query, composite_scopes)
+            # Callback with maximums. Note that max child complexity does not necessarily
+            # correspond to the maximum scope; an expensive top-level field could outweigh
+            # a cheaper field with the highest child selection cost.
+            field_complexity(
+              maximum_scope,
+              max_complexity: maximum_cost,
+              child_complexity: maximum_scope.composite? ? maximum_child_complexity : nil,
+            )
 
-              # This is the last composite scope visited; assume it's representative (for backwards compatibility).
-              # Note: it would be more correct to score each composite scope and use the maximum possibility.
-              field_cost = composite_scopes.last.own_complexity(child_complexity)
-              field_complexity(composite_scopes.last, max_complexity: field_cost, child_complexity: child_complexity)
-            end
-
-            total + field_cost
+            total + maximum_cost
           end
         end
       end
