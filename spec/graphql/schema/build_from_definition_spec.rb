@@ -1750,6 +1750,78 @@ type ReachableType implements Node {
     assert_equal schema_str, schema.to_definition
   end
 
+  describe "Type Extensions" do
+    it "Extends object types with fields" do
+      sdl = %|
+        type T { a:Int }
+        extend type T { b:Int }
+        type Query { t:T }
+      |
+      schema = GraphQL::Schema.from_definition(sdl)
+      assert_equal ["a", "b"], schema.get_type("T").fields.keys.sort
+    end
+
+    it "Extends object types with interfaces" do
+      sdl = %|
+        interface A { a:Int }
+        interface B { b:Int }
+        type T implements A { a:Int }
+        extend type T implements B { b:Int }
+        type Query { t:T }
+      |
+      schema = GraphQL::Schema.from_definition(sdl)
+      assert_equal ["A", "B"], schema.get_type("T").interfaces.map(&:graphql_name).sort
+    end
+
+    it "Extends object types with directives" do
+      sdl = %|
+        directive @a on OBJECT
+        directive @b on OBJECT
+        type T @a { a:Int }
+        extend type T @b { b:Int }
+        type Query { t:T }
+      |
+      schema = GraphQL::Schema.from_definition(sdl)
+      assert_equal ["a", "b"], schema.get_type("T").directives.map(&:graphql_name).sort
+    end
+
+    it "Extends interface types with fields" do
+      sdl = %|
+        interface I { a:Int }
+        extend interface I { b:Int }
+        type T implements I { a:Int b:Int }
+        type Query { t:T }
+      |
+      schema = GraphQL::Schema.from_definition(sdl)
+      assert_equal ["a", "b"], schema.get_type("I").fields.keys.sort
+    end
+
+    it "Extends interface types with interfaces" do
+      sdl = %|
+        interface A { a:Int }
+        interface B { b:Int }
+        extend interface A implements B { b:Int }
+        type T implements A { a:Int b:Int }
+        type Query { t:T }
+      |
+      schema = GraphQL::Schema.from_definition(sdl)
+      assert_equal ["B"], schema.get_type("A").interfaces.map(&:graphql_name).sort
+    end
+
+    it "Extends interface types with directives" do
+      sdl = %|
+        directive @a on INTERFACE
+        directive @b on INTERFACE
+        interface A @a { a:Int }
+        extend interface A @b { b:Int }
+        type T implements A { a:Int b:Int }
+        type Query { t:T }
+      |
+      schema = GraphQL::Schema.from_definition(sdl)
+      assert_equal ["a", "b"], schema.get_type("A").directives.map(&:graphql_name).sort
+    end
+  end
+
   if USING_C_PARSER
     it "makes frozen identifiers with CParser" do
       schema_class = GraphQL::Schema.from_definition("type Query { f: Boolean }")
